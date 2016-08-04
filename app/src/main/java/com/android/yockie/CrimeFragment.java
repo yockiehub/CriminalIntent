@@ -39,6 +39,7 @@ public class CrimeFragment extends Fragment {
     public static final String EXTRA_CRIME_ID = "criminalintent.CRIME_ID";
     private static final String DIALOG_DATE = "date";
     private static final String TAG = "CrimeFragment";
+    private static final String DIALOG_FRAGMENT = "DialogFragment";
 
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_PHOTO = 1;
@@ -145,7 +146,17 @@ public class CrimeFragment extends Fragment {
         }
 
         mPhotoView = (ImageView) v.findViewById(R.id.crime_imageView);
-
+        mPhotoView.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Photo p = mCrime.getPhoto();
+                if (p == null){
+                    return;
+                }
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                String path = getActivity().getFileStreamPath(p.getFilename()).getAbsolutePath();
+                ImageFragment.newInstance(path).show(fm, DIALOG_FRAGMENT);
+            }
+        });
 
         return v; 
     }
@@ -203,6 +214,8 @@ public class CrimeFragment extends Fragment {
                 //UUID crimeId = (UUID)getArguments().getSerializable(EXTRA_CRIME_ID);
                 //Crime c = CrimeLab.get(getActivity()).getCrime(crimeId);
                 Crime c = getThisCrime();
+                //First, we delete the picture associated with the crime, so that it's not lost in the memory
+                getActivity().deleteFile(c.getPhoto().getFilename());
                 crimeLab.deleteCrime(c);
                 NavUtils.navigateUpFromSameTask(getActivity());
                 return true;
@@ -216,7 +229,7 @@ public class CrimeFragment extends Fragment {
     public void onPause(){
         super.onPause();
         CrimeLab.get(getActivity()).saveCrimes();
-    }
+        }
 
     @Override
     public void onStart(){
