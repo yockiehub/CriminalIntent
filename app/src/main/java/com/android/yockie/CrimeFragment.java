@@ -5,9 +5,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NavUtils;
@@ -27,11 +30,11 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-
 import com.android.yockie.R;
 
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.UUID;
 
@@ -43,6 +46,7 @@ public class CrimeFragment extends Fragment {
 
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_PHOTO = 1;
+    private static final int REQUEST_CONTACT = 2;
 
     Crime mCrime;
     EditText mTitleField;
@@ -50,6 +54,7 @@ public class CrimeFragment extends Fragment {
     CheckBox mSolvedCheckBox;
 
     private ImageButton mPhotoButton;
+    private Button mSuspectButton;
     private ImageView mPhotoView;
 
     public static CrimeFragment newInstance(UUID crimeId) {
@@ -73,7 +78,10 @@ public class CrimeFragment extends Fragment {
     }
     
     public void updateDate() {
-        mDateButton.setText(mCrime.getDate().toString());
+        String dateFormat = "EEE, MMM dd";
+        String dateString = android.text.format.DateFormat.format(dateFormat, mCrime.getDate()).toString();
+        mDateButton.setText(dateString);
+        //mDateButton.setText(mCrime.getDate().toString());
     }
 
     @TargetApi(11)
@@ -158,6 +166,30 @@ public class CrimeFragment extends Fragment {
             }
         });
 
+        Button reportButton = (Button) v.findViewById(R.id.crime_report_button);
+        reportButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.setType("text/plain");
+                i.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
+                i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
+                i = Intent.createChooser(i, getString(R.string.send_report));
+                startActivity(i);
+            }
+        });
+
+        mSuspectButton = (Button) v.findViewById(R.id.crime_choose_suspect_button);
+        mSuspectButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent i = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+                startActivityForResult(i, REQUEST_CONTACT);
+            }
+        });
+
+        if (mCrime.getSuspect() != null){
+            mSuspectButton.setText(mCrime.getSuspect());
+        }
+
         return v; 
     }
 
@@ -182,8 +214,9 @@ public class CrimeFragment extends Fragment {
         }else if (requestCode == REQUEST_PHOTO){
             //Create a new Photo object and attach it to the crime
             String filename = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
+            int orientation = data.getIntExtra(CrimeCameraFragment.EXTRA_PHOTO_ORIENTATION, 0);
             if (filename != null){
-                Photo p = new Photo(filename);
+                Photo p = new Photo(filename, orientation);
                 if (mCrime.getPhoto() != null){
                     getActivity().deleteFile(mCrime.getPhoto().getFilename());
                     Log.i(TAG, "Image deleted.");
@@ -192,6 +225,25 @@ public class CrimeFragment extends Fragment {
                 //Log.i(TAG, "Crime: " + mCrime.getTitle() + " has a photo");
                 showPhoto();
             }
+        }else if ( requestCode == REQUEST_CONTACT){
+            Uri contactUri = data.getData();
+            //Specify which fields I want my query to return values for
+            String [] queryFields = new String [] {
+                    ContactsContract.Contacts.DISPLAY_NAME
+            };
+            //Perform my query
+            Cursor c = getActivity().getContentResolver().query(contactUri, queryFields, null, null, null);
+            //Double check that I actualy got results
+            if (c.getCount() == 0){
+                c.close();
+                return;
+            }
+            //Pull out the first column of the first row of data - the suspect's name
+            c.moveToFirst();
+            String suspect = c.getString(0);
+            mCrime.setSuspect(suspect);
+            mSuspectButton.setText(suspect);
+            c.close();
         }
     }
 
@@ -247,5 +299,25 @@ public class CrimeFragment extends Fragment {
         UUID crimeId = (UUID)getArguments().getSerializable(EXTRA_CRIME_ID);
         Crime c = CrimeLab.get(getActivity()).getCrime(crimeId);
         return c;
+    }
+
+    private String getCrimeReport(){
+        String solvedString = null;
+        if(mCrime.isSolved()){
+            solvedString = getString(R.string.crime_report_solved);
+        }else{
+            solvedString = getString(R.string.crime_report_unsolved);
+        }
+        String dateFormat = "EEE, MMM dd";
+        String dateString = android.text.format.DateFormat.format(dateFormat, mCrime.getDate()).toString();
+
+        String suspect = mCrime.getSuspect();
+        if(suspect == null){
+            suspect = getString(R.string.crime_report_no_suspect);
+        }else{
+            suspect = getString(R.string.crime_report_suspect, suspect);
+        }
+        String report = getString(R.string.crime_report, mCrime.getTitle(), dateString, solvedString, suspect);
+        return report;
     }
 }
