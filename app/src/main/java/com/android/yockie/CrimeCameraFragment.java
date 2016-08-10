@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Camera;
+import android.hardware.SensorManager;
+import android.media.ExifInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -30,8 +32,13 @@ import java.util.UUID;
 public class CrimeCameraFragment extends Fragment {
     private static final String TAG = "CrimeCameraFragment";
     public static final String EXTRA_PHOTO_FILENAME = "com.android.yockie.photoFilename";
-    public static final String EXTRA_PHOTO_ORIENTATION = "com.android.yockie.photoOrientation";
 
+    private OrientationEventListener mOrientationEventListener;
+    private Orientation mOrientation;
+    public enum Orientation {
+        ORIENTATION_PORTRAIT_NORMAL, ORIENTATION_PORTRAIT_INVERTED,
+        ORIENTATION_LANDSCAPE_NORMAL, ORIENTATION_LANDSCAPE_INVERTED
+    }
 
     private Camera mCamera;
     private SurfaceView mSurfaceView;
@@ -61,7 +68,8 @@ public class CrimeCameraFragment extends Fragment {
             boolean success = true;
             try{
                 fos = getActivity().openFileOutput(filename, Context.MODE_PRIVATE);
-                fos.write(data);
+                fos.write(PictureUtils.rotatePicture(data, mOrientation));
+                //fos.write(data);
             }catch(Exception e){
                 Log.e(TAG, "Error writing file " + filename, e);
                 success = false;
@@ -75,10 +83,8 @@ public class CrimeCameraFragment extends Fragment {
                     success = false;
                 }
             }if (success){
-                int rotation = getActivity().getResources().getConfiguration().orientation;
                 Intent i = new Intent();
                 i.putExtra(EXTRA_PHOTO_FILENAME, filename);
-                i.putExtra(EXTRA_PHOTO_ORIENTATION, rotation);
                 getActivity().setResult(Activity.RESULT_OK, i);
             }else{
                 getActivity().setResult(Activity.RESULT_CANCELED);
@@ -166,6 +172,27 @@ public class CrimeCameraFragment extends Fragment {
         }else{
             mCamera = Camera.open();
         }
+        if (mOrientationEventListener == null) {
+            mOrientationEventListener = new OrientationEventListener(getActivity(),
+                    SensorManager.SENSOR_DELAY_NORMAL) {
+                @Override
+                public void onOrientationChanged(int orientation) {
+                    if ((orientation >= 315) || (orientation < 45)) {
+                        mOrientation = Orientation.ORIENTATION_PORTRAIT_NORMAL;
+                    } else if ((orientation < 315) && (orientation >= 225)) {
+                        mOrientation = Orientation.ORIENTATION_LANDSCAPE_NORMAL;
+                    } else if ((orientation < 225) && (orientation >= 135)) {
+                        mOrientation = Orientation.ORIENTATION_PORTRAIT_INVERTED;
+                    } else if ((orientation < 135) && (orientation > 45)) {
+                        mOrientation = Orientation.ORIENTATION_LANDSCAPE_INVERTED;
+                    }
+                }
+            };
+        }
+
+        if (mOrientationEventListener.canDetectOrientation()) {
+            mOrientationEventListener.enable();
+        }
     }
 
     @Override
@@ -175,6 +202,9 @@ public class CrimeCameraFragment extends Fragment {
         if (mCamera != null){
             mCamera.release();
             mCamera = null;
+        }
+        if (mOrientationEventListener != null) {
+            mOrientationEventListener.disable();
         }
     }
 

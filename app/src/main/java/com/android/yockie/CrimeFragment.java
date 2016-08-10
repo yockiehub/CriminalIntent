@@ -228,63 +228,24 @@ public class CrimeFragment extends Fragment {
         }else if (requestCode == REQUEST_PHOTO){
             //Create a new Photo object and attach it to the crime
             String filename = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
-            int orientation = data.getIntExtra(CrimeCameraFragment.EXTRA_PHOTO_ORIENTATION, 0);
+            //int orientation = data.getIntExtra(CrimeCameraFragment.EXTRA_PHOTO_ORIENTATION, 0);
             if (filename != null){
-                Photo p = new Photo(filename, orientation);
+                Photo p = new Photo(filename);
                 if (mCrime.getPhoto() != null){
                     getActivity().deleteFile(mCrime.getPhoto().getFilename());
                     Log.i(TAG, "Image deleted.");
                 }
                 mCrime.setPhoto(p);
-                //Log.i(TAG, "Crime: " + mCrime.getTitle() + " has a photo");
                 showPhoto();
             }
         }else if ( requestCode == REQUEST_CONTACT){
 
-
-            /*uriContact = data.getData();
-            String[] projection    = new String[] {ContactsContract.Contacts.DISPLAY_NAME};
-
-
-            Cursor people = getActivity().getContentResolver().query(uriContact, projection, null, null, null);
-
-            people.moveToFirst();
-
-            int indexName = people.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
-            String name   = people.getString(indexName);
-
-            mCrime.setSuspect(name);
-            mSuspectButton.setText(name);
-
-            people.close();
-
-            retrieveContactNumber();
-*/
-
             uriContact = data.getData();
-            //Specify which fields I want my query to return values for
-            String [] queryFields = new String [] {
-                    ContactsContract.Contacts.DISPLAY_NAME
-            };
-            //Perform my query
-            Cursor c = getActivity().getContentResolver().query(uriContact, queryFields, null, null, null);
-            //Double check that I actually got results
-            if (c.getCount() == 0){
-                c.close();
-                return;
-            }
-            //Pull out the first column of the first row of data - the suspect's name
-            c.moveToFirst();
-            String suspect = c.getString(0);
-            mCrime.setSuspect(suspect);
-            mSuspectButton.setText(suspect);
 
-            c.close();
-
+            retrieveContactName();
             retrieveContactNumber();
         }
     }
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -301,8 +262,6 @@ public class CrimeFragment extends Fragment {
                 return true;
             case R.id.menu_item_delete_crime_from_fragment:
                 CrimeLab crimeLab = CrimeLab.get(getActivity());
-                //UUID crimeId = (UUID)getArguments().getSerializable(EXTRA_CRIME_ID);
-                //Crime c = CrimeLab.get(getActivity()).getCrime(crimeId);
                 Crime c = getThisCrime();
                 //First, we delete the picture associated with the crime, so that it's not lost in the memory
                 getActivity().deleteFile(c.getPhoto().getFilename());
@@ -383,7 +342,7 @@ public class CrimeFragment extends Fragment {
 
                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ? AND " +
                         ContactsContract.CommonDataKinds.Phone.TYPE + " = " +
-                        ContactsContract.CommonDataKinds.Phone.TYPE,
+                        ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE,
 
                 new String[]{contactID},
                 null);
@@ -399,4 +358,25 @@ public class CrimeFragment extends Fragment {
         Log.d(TAG, "Contact Phone Number: " + contactNumber);
     }
 
+    private void retrieveContactName(){
+
+        //Specify which fields I want my query to return values for
+        String [] queryFields = new String [] {
+                ContactsContract.Contacts.DISPLAY_NAME
+        };
+        //Perform my query
+        Cursor c = getActivity().getContentResolver().query(uriContact, queryFields, null, null, null);
+        //Double check that I actually got results
+        if (c.getCount() == 0){
+            c.close();
+            return;
+        }
+        //Pull out the first column of the first row of data - the suspect's name
+        c.moveToFirst();
+        String suspect = c.getString(0);
+        mCrime.setSuspect(suspect);
+        mSuspectButton.setText(suspect);
+
+        c.close();
+    }
 }
