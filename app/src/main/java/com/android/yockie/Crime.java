@@ -13,6 +13,7 @@ public class Crime {
     private static final String JSON_DATE = "date";
     private static final String JSON_PHOTO = "photo";
     private static final String JSON_SUSPECT = "suspect";
+    private static final String JSON_SUSPECT_PHONE = "phone";
 
     private UUID mId;
     private String mTitle;
@@ -20,6 +21,8 @@ public class Crime {
     private boolean mSolved;
     private Photo mPhoto;
     private String mSuspect;
+
+    public String mPhonNumber;
 
     public Crime() {
         mId = UUID.randomUUID();
@@ -36,7 +39,10 @@ public class Crime {
         }
         if (json.has(JSON_SUSPECT)){
             mSuspect = json.getString(JSON_SUSPECT);
+        }if (json.has(JSON_SUSPECT_PHONE)){
+            mPhonNumber = json.getString(JSON_SUSPECT_PHONE);
         }
+
     }
 
     @Override
@@ -88,6 +94,14 @@ public class Crime {
         mSuspect = suspect;
     }
 
+    public String getPhoneNumber(){
+        return mPhonNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber){
+        mPhonNumber = phoneNumber;
+    }
+
     public JSONObject toJSON() throws JSONException{
         JSONObject json = new JSONObject();
         json.put(JSON_ID, mId.toString());
@@ -98,6 +112,9 @@ public class Crime {
             json.put(JSON_PHOTO, mPhoto.toJSON());
         }
         json.put(JSON_SUSPECT, mSuspect);
+        if (mPhonNumber != null){
+            json.put(JSON_SUSPECT_PHONE, mPhonNumber);
+        }
         return json;
     }
 
