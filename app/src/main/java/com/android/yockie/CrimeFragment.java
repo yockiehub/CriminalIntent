@@ -264,7 +264,9 @@ public class CrimeFragment extends Fragment {
                 CrimeLab crimeLab = CrimeLab.get(getActivity());
                 Crime c = getThisCrime();
                 //First, we delete the picture associated with the crime, so that it's not lost in the memory
-                getActivity().deleteFile(c.getPhoto().getFilename());
+                if (c.getPhoto() != null){
+                    getActivity().deleteFile(c.getPhoto().getFilename());
+                }
                 crimeLab.deleteCrime(c);
                 NavUtils.navigateUpFromSameTask(getActivity());
                 return true;

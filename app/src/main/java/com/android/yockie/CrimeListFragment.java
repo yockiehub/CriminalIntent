@@ -89,8 +89,10 @@ public class CrimeListFragment extends ListFragment {
                             CrimeLab crimeLab = CrimeLab.get(getActivity());
                             for (int i = adapter.getCount() - 1; i >= 0; i--){
                                 if (getListView().isItemChecked(i)){
-                                    //First, delete picture of the crime
-                                    getActivity().deleteFile(adapter.getItem(i).getPhoto().getFilename());
+                                    //First, delete picture of the crime if there is any
+                                    if (adapter.getItem(i).getPhoto() != null){
+                                        getActivity().deleteFile(adapter.getItem(i).getPhoto().getFilename());
+                                    }
                                     crimeLab.deleteCrime(adapter.getItem(i));
                                 }
                             }
@@ -182,8 +184,10 @@ public class CrimeListFragment extends ListFragment {
 
         switch (item.getItemId()){
             case R.id.menu_item_delete_crime:
-                //Deleting crime's picture first
-                getActivity().deleteFile(crime.getPhoto().getFilename());
+                //Deleting crime's picture first if there is any
+                if (crime.getPhoto() != null){
+                    getActivity().deleteFile(crime.getPhoto().getFilename());
+                }
                 CrimeLab.get(getActivity()).deleteCrime(crime);
                 adapter.notifyDataSetChanged();
                 return true;
