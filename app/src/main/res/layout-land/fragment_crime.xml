@@ -106,6 +106,15 @@
                 android:layout_marginRight="16dp"
                 android:text="@string/crime_report_text"
                 />
+            <Button
+                android:id="@+id/crime_phone_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:text="@string/crime_phone_text"
+                />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

@@ -4,11 +4,16 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.media.ExifInterface;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.Display;
@@ -21,9 +26,11 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -68,7 +75,9 @@ public class CrimeCameraFragment extends Fragment {
             boolean success = true;
             try{
                 fos = getActivity().openFileOutput(filename, Context.MODE_PRIVATE);
-                fos.write(PictureUtils.rotatePicture(data, mOrientation));
+                byte[] dataConverted = PictureUtils.rotatePicture(data, mOrientation);
+                fos.write(dataConverted);
+                saveImageToExternalStorage(BitmapFactory.decodeByteArray(dataConverted,0,dataConverted.length), filename);
                 //fos.write(data);
             }catch(Exception e){
                 Log.e(TAG, "Error writing file " + filename, e);
@@ -220,4 +229,42 @@ public class CrimeCameraFragment extends Fragment {
         }
         return bestSize;
     }
+
+    private void saveImageToExternalStorage(Bitmap finalBitmap, String filename) {
+        String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString();
+        File myDir = new File(root + "/saved_images");
+        myDir.mkdirs();
+        Random generator = new Random();
+        int n = 10000;
+        n = generator.nextInt(n);
+        //String fname = "Image-" + n + ".jpg";
+        String fname = filename;
+        File file = new File(myDir, fname);
+        if (file.exists())
+            file.delete();
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            out.flush();
+            out.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        // Tell the media scanner about the new file so that it is
+        // immediately available to the user.
+        MediaScannerConnection.scanFile(getActivity(), new String[]{file.toString()}, null,
+                new MediaScannerConnection.OnScanCompletedListener() {
+                    public void onScanCompleted(String path, Uri uri) {
+                        Log.i("ExternalStorage", "Scanned " + path + ":");
+                        Log.i("ExternalStorage", "-> uri=" + uri);
+                    }
+                });
+
+    }
+
+
+
 }

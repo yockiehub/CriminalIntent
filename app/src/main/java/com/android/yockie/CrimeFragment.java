@@ -2,14 +2,20 @@ package com.android.yockie;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -32,10 +38,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import com.android.yockie.R;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 public class CrimeFragment extends Fragment {
@@ -172,11 +182,25 @@ public class CrimeFragment extends Fragment {
 
         Button reportButton = (Button) v.findViewById(R.id.crime_report_button);
         reportButton.setOnClickListener(new View.OnClickListener() {
+
             public void onClick(View v) {
                 Intent i = new Intent(Intent.ACTION_SEND);
-                i.setType("text/plain");
+
+                //Uri uri = Uri.fromFile(getActivity().getFileStreamPath(mCrime.getPhoto().getFilename()).getAbsoluteFile());
+                //Uri uriImage = Uri.parse("file:///data/user/0/com.yockie.android/files/"+mCrime.getPhoto().getFilename());
+
+                File downloadedPic =  new File(
+                        Environment.getExternalStoragePublicDirectory(
+                                Environment.DIRECTORY_PICTURES), "saved_images/"+mCrime.getPhoto().getFilename());
+
+                Uri uri = Uri.fromFile(downloadedPic);
+
+
+                i.setType("image/*");
                 i.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
                 i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
+                i.putExtra(Intent.EXTRA_STREAM, uri);
+
                 i = Intent.createChooser(i, getString(R.string.send_report));
                 startActivity(i);
             }
@@ -228,7 +252,6 @@ public class CrimeFragment extends Fragment {
         }else if (requestCode == REQUEST_PHOTO){
             //Create a new Photo object and attach it to the crime
             String filename = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
-            //int orientation = data.getIntExtra(CrimeCameraFragment.EXTRA_PHOTO_ORIENTATION, 0);
             if (filename != null){
                 Photo p = new Photo(filename);
                 if (mCrime.getPhoto() != null){
