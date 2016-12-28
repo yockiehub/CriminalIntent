@@ -232,7 +232,7 @@ public class CrimeCameraFragment extends Fragment {
 
     private void saveImageToExternalStorage(Bitmap finalBitmap, String filename) {
         String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString();
-        File myDir = new File(root + "/saved_images");
+        File myDir = new File(root + "/CriminalIntent");
         myDir.mkdirs();
         Random generator = new Random();
         int n = 10000;

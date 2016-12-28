@@ -128,6 +128,7 @@ public class CrimeFragment extends Fragment {
 
             public void afterTextChanged(Editable c) {
                 // this one too
+
             }
         });
         
@@ -191,7 +192,7 @@ public class CrimeFragment extends Fragment {
 
                 File downloadedPic =  new File(
                         Environment.getExternalStoragePublicDirectory(
-                                Environment.DIRECTORY_PICTURES), "saved_images/"+mCrime.getPhoto().getFilename());
+                                Environment.DIRECTORY_PICTURES), "CriminalIntent/"+mCrime.getPhoto().getFilename());
 
                 Uri uri = Uri.fromFile(downloadedPic);
 
@@ -289,6 +290,7 @@ public class CrimeFragment extends Fragment {
                 //First, we delete the picture associated with the crime, so that it's not lost in the memory
                 if (c.getPhoto() != null){
                     getActivity().deleteFile(c.getPhoto().getFilename());
+                    callBroadCast(); //THIS DOES NOT WORK.
                 }
                 crimeLab.deleteCrime(c);
                 NavUtils.navigateUpFromSameTask(getActivity());
@@ -297,6 +299,26 @@ public class CrimeFragment extends Fragment {
             default:
                 return super.onOptionsItemSelected(item);
         } 
+    }
+
+    public void callBroadCast(){
+        if (Build.VERSION.SDK_INT >= 14) {
+            Log.e("-->", " >= 14");
+            MediaScannerConnection.scanFile(getActivity(), new String[]{Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+ "/CriminalIntent"}, null, new MediaScannerConnection.OnScanCompletedListener() {
+                /*
+                 *   (non-Javadoc)
+                 * @see android.media.MediaScannerConnection.OnScanCompletedListener#onScanCompleted(java.lang.String, android.net.Uri)
+                 */
+                public void onScanCompleted(String path, Uri uri) {
+                    Log.e("ExternalStorage", "Scanned " + path + ":");
+                    Log.e("ExternalStorage", "-> uri=" + uri);
+                }
+            });
+        } else {
+            Log.e("-->", " < 14");
+            getActivity().sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
+                    Uri.parse("file://" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+ "/CriminalIntent")));
+        }
     }
 
     @Override

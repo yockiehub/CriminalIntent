@@ -221,7 +221,12 @@ public class CrimeListFragment extends ListFragment {
 
             TextView titleTextView =
                 (TextView)convertView.findViewById(R.id.crime_list_item_titleTextView);
-            titleTextView.setText(c.getTitle());
+            if (c.getTitle() == null || c.getTitle().equals("")){
+                titleTextView.setText("Unnamed crime");
+                c.setTitle("Unnamed crime");
+            }else{
+                titleTextView.setText(c.getTitle());
+            }
             TextView dateTextView =
                 (TextView)convertView.findViewById(R.id.crime_list_item_dateTextView);
             String dateFormat = "EEE, MMM dd, hh:mm aa";
