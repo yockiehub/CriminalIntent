@@ -256,8 +256,17 @@ public class CrimeFragment extends Fragment {
             if (filename != null){
                 Photo p = new Photo(filename);
                 if (mCrime.getPhoto() != null){
-                    getActivity().deleteFile(mCrime.getPhoto().getFilename());
-                    Log.i(TAG, "Image deleted.");
+
+                    String str = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+ "/CriminalIntent/";
+                    str = str + mCrime.getPhoto().getFilename();
+                    File file = new File(str);
+                    boolean deleted = file.delete();
+                    if (!deleted){
+                        Log.i(TAG, "Image could not be deleted.");
+                    }else{
+                        getActivity().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(str))));
+                        Log.i(TAG, "Image deleted.");
+                    }
                 }
                 mCrime.setPhoto(p);
                 showPhoto();
@@ -289,8 +298,17 @@ public class CrimeFragment extends Fragment {
                 Crime c = getThisCrime();
                 //First, we delete the picture associated with the crime, so that it's not lost in the memory
                 if (c.getPhoto() != null){
-                    getActivity().deleteFile(c.getPhoto().getFilename());
-                    callBroadCast(); //THIS DOES NOT WORK.
+                    //getActivity().deleteFile(c.getPhoto().getFilename());
+
+
+
+                    String str = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+ "/CriminalIntent/";
+                    str = str + c.getPhoto().getFilename();
+                    File file = new File(str);
+                    boolean deleted = file.delete();
+
+                    getActivity().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(str))));
+
                 }
                 crimeLab.deleteCrime(c);
                 NavUtils.navigateUpFromSameTask(getActivity());
@@ -299,26 +317,6 @@ public class CrimeFragment extends Fragment {
             default:
                 return super.onOptionsItemSelected(item);
         } 
-    }
-
-    public void callBroadCast(){
-        if (Build.VERSION.SDK_INT >= 14) {
-            Log.e("-->", " >= 14");
-            MediaScannerConnection.scanFile(getActivity(), new String[]{Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+ "/CriminalIntent"}, null, new MediaScannerConnection.OnScanCompletedListener() {
-                /*
-                 *   (non-Javadoc)
-                 * @see android.media.MediaScannerConnection.OnScanCompletedListener#onScanCompleted(java.lang.String, android.net.Uri)
-                 */
-                public void onScanCompleted(String path, Uri uri) {
-                    Log.e("ExternalStorage", "Scanned " + path + ":");
-                    Log.e("ExternalStorage", "-> uri=" + uri);
-                }
-            });
-        } else {
-            Log.e("-->", " < 14");
-            getActivity().sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
-                    Uri.parse("file://" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+ "/CriminalIntent")));
-        }
     }
 
     @Override

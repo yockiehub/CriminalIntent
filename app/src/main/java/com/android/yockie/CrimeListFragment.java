@@ -2,8 +2,10 @@ package com.android.yockie;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.ListFragment;
 import android.view.ActionMode;
 import android.view.ContextMenu;
@@ -20,6 +22,7 @@ import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class CrimeListFragment extends ListFragment {
@@ -91,7 +94,14 @@ public class CrimeListFragment extends ListFragment {
                                 if (getListView().isItemChecked(i)){
                                     //First, delete picture of the crime if there is any
                                     if (adapter.getItem(i).getPhoto() != null){
-                                        getActivity().deleteFile(adapter.getItem(i).getPhoto().getFilename());
+                                        //getActivity().deleteFile(adapter.getItem(i).getPhoto().getFilename());
+
+                                        String str = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+ "/CriminalIntent/";
+                                        str = str + adapter.getItem(i).getPhoto().getFilename();
+                                        File file = new File(str);
+                                        boolean deleted = file.delete();
+
+                                        getActivity().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(str))));
                                     }
                                     crimeLab.deleteCrime(adapter.getItem(i));
                                 }

@@ -90,6 +90,9 @@ public class PictureUtils {
             case ORIENTATION_LANDSCAPE_INVERTED:
                 matrix.postRotate(180);
                 break;
+            default:
+                matrix.postRotate(90);
+
         }
 
         Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
