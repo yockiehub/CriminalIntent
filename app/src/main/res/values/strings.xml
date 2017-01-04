@@ -1,30 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name">CriminalIntent</string>
-  <string name="crime_title_hint">Enter a title for this crime.</string>
-  <string name="crime_title_label">Title</string> 
-  <string name="crime_details_label">Details</string> 
-  <string name="crime_solved_label">Solved?</string>
-  <string name="date_picker_title">Date of crime:</string>
-  <string name="crimes_title">Crimes</string>
-  <string name="new_crime">New Crime</string>
-  <string name="show_subtitle">Show Subtitle</string>
-  <string name="hide_subtitle">Hide Subtitle</string> 
-  <string name="subtitle">Sometimes tolerance is not a virtue.</string>
-  <string name="delete_crime">Delete crime</string>
-  <string name="modify_crime">Modify crime</string>
-  <string name="take">Shoot!</string>
-  <string name="choose_suspect_text">Choose Suspect</string>
-  <string name="crime_report_text">Send Crime Report</string>
+    <string name="app_name">CriminalIntent</string>
+    <string name="crime_title_hint">Enter a title for this crime.</string>
+    <string name="crime_title_label">Title</string>
+    <string name="crime_details_label">Details</string>
+    <string name="crime_solved_label">Solved?</string>
+    <string name="date_picker_title">Date of crime:</string>
+    <string name="crimes_title">Crimes</string>
+    <string name="new_crime">New Crime</string>
+    <string name="show_subtitle">Show Subtitle</string>
+    <string name="hide_subtitle">Hide Subtitle</string>
+    <string name="subtitle">Sometimes tolerance is not a virtue.</string>
+    <string name="delete_crime">Delete crime</string>
+    <string name="modify_crime">Modify crime</string>
+    <string name="take">Shoot!</string>
+    <string name="choose_suspect_text">Choose Suspect</string>
+    <string name="crime_report_text">Send Crime Report</string>
+    <string name="home_screen_greeting">Welcome!</string>
   <string name="crime_report">%1$s!
     The crime was discovered on %2$s. %3$s, and %4$s</string>
-  <string name="crime_report_solved">The case is solved</string>
-  <string name="crime_report_unsolved">The case is not solved</string>
-  <string name="crime_report_no_suspect">There is no suspect</string>
-  <string name="crime_report_suspect">The suspect is %s</string>
-  <string name="crime_report_subject">Criminal Intent Crime Report</string>
-  <string name="send_report">Send report via</string>
-  <string name="crime_phone_text">Call Suspect</string>
+    <string name="crime_report_solved">The case is solved</string>
+    <string name="crime_report_unsolved">The case is not solved</string>
+    <string name="crime_report_no_suspect">There is no suspect</string>
+    <string name="crime_report_suspect">The suspect is %s</string>
+    <string name="crime_report_subject">Criminal Intent Crime Report</string>
+    <string name="send_report">Send report via</string>
+    <string name="crime_phone_text">Call Suspect</string>
 
 </resources>

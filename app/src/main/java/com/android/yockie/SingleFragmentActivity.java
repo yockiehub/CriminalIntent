@@ -1,6 +1,8 @@
 package com.android.yockie;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -8,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import com.android.yockie.R;
 
 public abstract class SingleFragmentActivity extends FragmentActivity {
+
     protected abstract Fragment createFragment();
 
     @Override

@@ -66,6 +66,7 @@ public class CrimeFragment extends Fragment {
     private ImageButton mPhotoButton;
     private Button mSuspectButton;
     private Button mPhoneButton;
+    private Button mReportButton;
     private ImageView mPhotoView;
 
     private Uri uriContact;
@@ -181,27 +182,26 @@ public class CrimeFragment extends Fragment {
             }
         });
 
-        Button reportButton = (Button) v.findViewById(R.id.crime_report_button);
-        reportButton.setOnClickListener(new View.OnClickListener() {
-
+        mReportButton = (Button) v.findViewById(R.id.crime_report_button);
+        mReportButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent i = new Intent(Intent.ACTION_SEND);
+                if (mCrime.getPhoto() != null){
+                    File downloadedPic = new File(
+                            Environment.getExternalStoragePublicDirectory(
+                                    Environment.DIRECTORY_PICTURES), "CriminalIntent/" + mCrime.getPhoto().getFilename());
+                    Uri uri = Uri.fromFile(downloadedPic);
 
-                //Uri uri = Uri.fromFile(getActivity().getFileStreamPath(mCrime.getPhoto().getFilename()).getAbsoluteFile());
-                //Uri uriImage = Uri.parse("file:///data/user/0/com.yockie.android/files/"+mCrime.getPhoto().getFilename());
+                    i.setType("image/*");
+                    i.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
+                    i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
+                    i.putExtra(Intent.EXTRA_STREAM, uri);
 
-                File downloadedPic =  new File(
-                        Environment.getExternalStoragePublicDirectory(
-                                Environment.DIRECTORY_PICTURES), "CriminalIntent/"+mCrime.getPhoto().getFilename());
-
-                Uri uri = Uri.fromFile(downloadedPic);
-
-
-                i.setType("image/*");
-                i.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
-                i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
-                i.putExtra(Intent.EXTRA_STREAM, uri);
-
+                }else{
+                    i.setType("text/*");
+                    i.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
+                    i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
+                }
                 i = Intent.createChooser(i, getString(R.string.send_report));
                 startActivity(i);
             }
@@ -298,10 +298,6 @@ public class CrimeFragment extends Fragment {
                 Crime c = getThisCrime();
                 //First, we delete the picture associated with the crime, so that it's not lost in the memory
                 if (c.getPhoto() != null){
-                    //getActivity().deleteFile(c.getPhoto().getFilename());
-
-
-
                     String str = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+ "/CriminalIntent/";
                     str = str + c.getPhoto().getFilename();
                     File file = new File(str);
