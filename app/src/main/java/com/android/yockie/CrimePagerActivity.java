@@ -10,7 +10,7 @@ import android.support.v4.view.ViewPager;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class CrimePagerActivity extends FragmentActivity {
+public class CrimePagerActivity extends FragmentActivity implements CrimeFragment.Callbacks{
     ViewPager mViewPager;
 
     @Override
@@ -43,5 +43,9 @@ public class CrimePagerActivity extends FragmentActivity {
                 break;
             } 
         }
+    }
+
+    public void onCrimeUpdated(Crime crime) {
+        //DOES NOTHING
     }
 }

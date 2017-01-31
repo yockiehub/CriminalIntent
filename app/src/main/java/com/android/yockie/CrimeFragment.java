@@ -72,6 +72,27 @@ public class CrimeFragment extends Fragment {
     private Uri uriContact;
     private String contactID;
 
+    private Callbacks mCallbacks;
+
+    /**
+     * Required interface for hosting activities
+     *
+     */
+    public interface Callbacks{
+        void onCrimeUpdated(Crime crime);
+    }
+
+    @Override
+    public void onAttach(Activity activity){
+        super.onAttach(activity);
+        mCallbacks = (Callbacks)activity;
+    }
+    @Override
+    public void onDetach(){
+        super.onDetach();
+        mCallbacks = null;
+    }
+
     public static CrimeFragment newInstance(UUID crimeId) {
         Bundle args = new Bundle();
         args.putSerializable(EXTRA_CRIME_ID, crimeId);
@@ -121,6 +142,7 @@ public class CrimeFragment extends Fragment {
         mTitleField.addTextChangedListener(new TextWatcher() {
             public void onTextChanged(CharSequence c, int start, int before, int count) {
                 mCrime.setTitle(c.toString());
+                mCallbacks.onCrimeUpdated(mCrime);
             }
 
             public void beforeTextChanged(CharSequence c, int start, int count, int after) {
@@ -152,6 +174,7 @@ public class CrimeFragment extends Fragment {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 // set the crime's solved property
                 mCrime.setSolved(isChecked);
+                mCallbacks.onCrimeUpdated(mCrime);
             }
         });
 
@@ -249,6 +272,7 @@ public class CrimeFragment extends Fragment {
         if (requestCode == REQUEST_DATE) {
             Date date = (Date)data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             mCrime.setDate(date);
+            mCallbacks.onCrimeUpdated(mCrime);
             updateDate();
         }else if (requestCode == REQUEST_PHOTO){
             //Create a new Photo object and attach it to the crime
@@ -269,6 +293,7 @@ public class CrimeFragment extends Fragment {
                     }
                 }
                 mCrime.setPhoto(p);
+                mCallbacks.onCrimeUpdated(mCrime);
                 showPhoto();
             }
         }else if ( requestCode == REQUEST_CONTACT){
@@ -277,6 +302,7 @@ public class CrimeFragment extends Fragment {
 
             retrieveContactName();
             retrieveContactNumber();
+            mCallbacks.onCrimeUpdated(mCrime);
         }
     }
 
@@ -291,6 +317,10 @@ public class CrimeFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+                if (getActivity().findViewById(R.id.detailFragmentContainer) != null){
+                    Log.i(TAG, "Home pressed");
+                    return true;
+                }
                 NavUtils.navigateUpFromSameTask(getActivity());
                 return true;
             case R.id.menu_item_delete_crime_from_fragment:
